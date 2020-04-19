@@ -4,11 +4,12 @@
   "description": "App to send polling to all connected ppks at the moment to rcom",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
   "author": "Yurii Litovinskyi",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "2.2.33"
+    "mongodb": "2.2.33",
+    "prompt-confirm": "^2.0.4"
   }
 }
