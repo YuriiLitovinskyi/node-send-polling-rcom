@@ -101,7 +101,8 @@ const getOnlinePpks = (db, callback) => {
             };
       
             // Get all ppk online at the moment   4 * 60 = 4 minutes
-            const onlinePpk = await collection.find({ time: {$lt: Date.now() - 172800 }}).count();
+            //const onlinePpk = await collection.find({ time: {$gt: (Date.now() - 604800) }}).count();
+            const onlinePpk = await collection.find({ time: {"gte": (new Date(Date.now() - 4 * 60 * 1000 )), "lt": new Date(Date.now())}}).count();
             console.log(`Total online ppks at the moment: ${onlinePpk}\n`); 
 
             // Get array of online ppks
