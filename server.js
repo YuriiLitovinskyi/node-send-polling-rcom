@@ -13,7 +13,7 @@ const url = 'mongodb://localhost:27017/DBClientsPPK';
         } else {
             console.log('Connected to database successfully!\n');            
 
-            getOnlinePpks(db, async (ppkArray) => {
+            countAllOnlinePpk(db, async (ppkArray) => {
                 //console.log("ppkArray", ppkArray);
 
                 if(ppkArray.length > 0){
@@ -39,7 +39,7 @@ const url = 'mongodb://localhost:27017/DBClientsPPK';
                                             await sleep(5000);
                                         }, 5000);                                
                                     };
-                                }, index * 1000);
+                                }, index * 60000);
                             });
                         } else {
                             db.close();
@@ -66,73 +66,81 @@ const sleep = (timeout) => {
     });
 };
 
-// // Collection 'ppkState'
-// const countAllOnlinePpk = (db, callback) => {
-//     setTimeout(() => {
-//         db.collection('ppkState', async (err, collection) => {
-//             if(err) {
-//                 console.log(err);
-//                 db.close();
-//                 await sleep(10000);
-//             };
-      
-//             // Get all ppk online at the moment from collection ppkState
-//             const onlinePpk = await collection.find({ markedAsOffline: false }).count();
-//             console.log(`Total online ppks at the moment: ${onlinePpk}`); 
-
-//             const onlinePpkObj = await collection.find({ markedAsOffline: false }).toArray((err, ppkArray) => {
-                
-//                 callback(ppkArray);
-
-//             });                    
-//         });        
-//     }, 1000);    
-// };
-
-
-// Collection 'coll_ping'
-const getOnlinePpks = (db, callback) => {
+// Collection 'ppkState'
+const countAllOnlinePpk = (db, callback) => {
     setTimeout(() => {
-        db.collection('coll_ping', async (err, collection) => {
+        db.collection('ppkState', async (err, collection) => {
             if(err) {
                 console.log(err);
                 db.close();
                 await sleep(10000);
             };
       
-            // Get all ppk online at the moment   4 * 60 = 4 minutes
-            //const onlinePpk = await collection.find({ time: {$gt: (Date.now() - 604800) }}).count();
-            const onlinePpk = await collection.find({ time: {"gte": (new Date(Date.now() - 4 * 60 * 1000 )), "lt": new Date(Date.now())}}).count();
-            console.log(`Total online ppks at the moment: ${onlinePpk}\n`); 
+            // Get all ppk online at the moment from collection ppkState
+            const onlinePpk = await collection.find({ lastActivity: {$gt: (Date.now() - 4 * 60 * 1000) }}).count();
+            //const onlinePpk = await collection.find({ markedAsOffline: false }).count();
+            console.log(`Total online ppks at the moment: ${onlinePpk}`); 
 
-            // Get array of online ppks
-            await collection.find({ time: {$lt: Date.now() - 172800 }}).toArray((err, ppkArray) => {
-                if(err) {
-                    console.log(err);
-                    db.close();                    
-                };                
+            //const onlinePpkObj = await collection.find({ markedAsOffline: false }).toArray((err, ppkArray) => {
+            const onlinePpkObj = await collection.find({ lastActivity: {$gt: (Date.now() - 4 * 60 * 1000) }}).toArray((err, ppkArray) => {
+                
                 callback(ppkArray);
-            });                          
+
+            });                    
         });        
     }, 1000);    
 };
 
+
+// Collection 'coll_ping'
+// const getOnlinePpks = (db, callback) => {
+//     setTimeout(() => {
+//         db.collection('coll_ping', async (err, collection) => {
+//             if(err) {
+//                 console.log(err);
+//                 db.close();
+//                 await sleep(10000);
+//             };
+      
+//             // Get all ppk online at the moment   4 * 60 = 4 minutes
+//             //const onlinePpk = await collection.find({ time: {$gt: (Date.now() - 604800) }}).count();
+//             const onlinePpk = await collection.find({ time: {"gte": (new Date(Date.now() - 4 * 60 * 1000 )), "lt": new Date(Date.now())}}).count();
+//             console.log(`Total online ppks at the moment: ${onlinePpk}\n`); 
+
+//             // Get array of online ppks
+//             await collection.find({ time: {$lt: Date.now() - 172800 }}).toArray((err, ppkArray) => {
+//                 if(err) {
+//                     console.log(err);
+//                     db.close();                    
+//                 };                
+//                 callback(ppkArray);
+//             });                          
+//         });        
+//     }, 1000);    
+// };
+
 // Insert query polling in Collection 'coll_ping'
 const sendPollingToPpk = (db, ppk_num, callback) => {
-    db.collection('coll_ping', async (err, collection) => {
+    db.collection('ppkCommandQueue', async (err, collection) => {
         if(err) {
             console.log(err);
             db.close();
             await sleep(10000);
         };
 
-        await collection.updateOne({ ppk_num : ppk_num },
-            { $set: { query : 48 } }, (err, result) => {
-                if(err){
-                    console.log(err);
-                };         
-            console.log(`${result}\n`);          
-            });  
+        // await collection.updateOne({ ppk_num : ppk_num },
+        //     { $set: { query : 48 } }, (err, result) => {
+        //         if(err){
+        //             console.log(err);
+        //         };         
+        //     console.log(`${result}\n`);          
+        //     }); 
+        
+        await collection.insertOne({ 
+            ppkNum : ppk_num,
+            message: "POLL",
+            time: Date.now() 
+        });
         callback();
     });
 };
