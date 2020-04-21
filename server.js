@@ -90,7 +90,7 @@ const countAllOnlinePpk = (db, callback) => {
 };
 
 
-// Insert query polling in Collection 'coll_ping'
+// Insert query polling in Collection 'ppkCommandQueue'
 const sendPollingToPpk = (db, ppk_num, callback) => {
     db.collection('ppkCommandQueue', async (err, collection) => {
         if(err) {
