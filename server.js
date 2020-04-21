@@ -103,7 +103,7 @@ const sendPollingToPpk = (db, ppk_num, callback) => {
             ppkNum : ppk_num,
             message: "POLL",
             time: Date.now() 
-        }, (err, result) => {
+        }, async (err, result) => {
             if(err){
                 console.log(err);
                 db.close();
