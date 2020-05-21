@@ -20,7 +20,7 @@ const url = 'mongodb://localhost:27017/DBClientsPPK';
                     ppkArray.sort((a, b) => a.ppk_num - b.ppk_num);
 
                     console.log(`Polling command will be sent to each device online with timeout of 60 seconds!`);
-                    console.log(`Total time for program execution: ${ppkArray.length} minutes\n`)
+                    console.log(`Total time for program execution: ${convertMinutes(ppkArray.length)} \n`)
 
                     prompt.ask((answer) => {                       
                         if(answer){
@@ -113,4 +113,13 @@ const sendPollingToPpk = (db, ppk_num, callback) => {
         });
         callback();
     });
+};
+
+// Convert minutes to hours and minutes
+const convertMinutes = (min) => {
+    const hours = (min / 60);
+    const rhours = Math.floor(hours);
+    const minutes = (hours - rhours) * 60;
+    const rminutes = Math.round(minutes);
+    return `${rhours} hour(s) ${rminutes} minute(s)`;
 };
