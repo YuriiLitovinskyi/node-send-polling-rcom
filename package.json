@@ -9,7 +9,7 @@
   "author": "Yurii Litovinskyi",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "2.2.33",
+    "mongodb": "3.1.13",
     "prompt-confirm": "^2.0.4"
   }
 }
